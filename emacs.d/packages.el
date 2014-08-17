@@ -25,10 +25,10 @@
 (dolist (package '(ace-jump-mode
                    dash
                    evil
-                   evil-paredit
                    paredit
                    column-marker
 		   clj-refactor
+		   cljsbuild-mode
                    clojure-mode
 		   clojure-mode-extra-font-locking
                    cider
@@ -110,7 +110,6 @@
   "Turn on pseudo-structural editing of Lisp code."
   t)
 (add-hook 'prog-mode-hook 'enable-paredit-mode)
-(add-hook 'prog-mode-hook 'evil-paredit-mode)
 (add-hook 'prog-mode-hook (lambda () (interactive) (column-marker-1 80)))
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
 (add-hook 'prog-mode-hook 'turn-on-eldoc-mode)
