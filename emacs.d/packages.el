@@ -17,7 +17,7 @@
       cider-repl-result-prefix ";; => ")
 
 (dolist (source '(("marmalade" . "http://marmalade-repo.org/packages/")
-		  ("melpa" . "http://melpa.milkbox.net/packages/")))
+                  ("melpa" . "http://melpa.milkbox.net/packages/")))
   (add-to-list 'package-archives source t))
 
 (package-initialize)
@@ -27,10 +27,10 @@
                    evil
                    paredit
                    column-marker
-		   clj-refactor
-		   cljsbuild-mode
+                   company
+                   clj-refactor
+                   cljsbuild-mode
                    clojure-mode
-		   clojure-mode-extra-font-locking
                    cider
                    exec-path-from-shell
                    ibuffer
@@ -43,19 +43,22 @@
                    rainbow-delimiters
                    saveplace
                    smex
-		   yasnippet
-		   ; themes
-		   ample-theme
-		   color-theme-sanityinc-tomorrow
-		   gruber-darker-theme
-		   noctilux-theme
-		   spacegray-theme))
+                   yasnippet
+                   yaml-mode
+                   ;; themes
+                   ;ample-theme
+                   ;base16-theme
+                   ;color-theme-sanityinc-tomorrow
+                   ;gruber-darker-theme
+                   noctilux-theme
+                   ;spacegray-theme
+                   ))
   (unless (package-installed-p package)
     (package-refresh-contents)
     (package-install package)))
 
-;(load-theme 'sanityinc-tomorrow-night t)
-;(load-theme 'gruber-darker t)
+(global-company-mode)
+
 (load-theme 'noctilux t)
 
 (exec-path-from-shell-initialize)
@@ -64,8 +67,8 @@
 
 (evil-mode t)
 (define-key evil-normal-state-map (kbd "SPC") 'ace-jump-mode)
-(define-key evil-normal-state-map (kbd "M-.") 'nrepl-jump)
-(define-key evil-normal-state-map (kbd "M-,") 'nrepl-jump-back)
+(define-key evil-normal-state-map (kbd "M-.") 'cider-jump)
+(define-key evil-normal-state-map (kbd "M-,") 'cider-jump-back)
 
 ;; Escape quits
 (defun minibuffer-keyboard-quit ()
@@ -90,12 +93,17 @@
 (key-chord-define evil-visual-state-map "jk" 'evil-change-to-previous-state)
 (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
 (key-chord-define evil-replace-state-map "jk" 'evil-normal-state)
+(key-chord-define-global "jx" 'smex)
 
-(key-chord-define evil-normal-state-map "bb" 'ido-switch-buffer)
+(key-chord-define evil-normal-state-map "bl" 'ido-switch-buffer)
 (key-chord-define evil-normal-state-map "bj" 'evil-prev-buffer)
 (key-chord-define evil-normal-state-map "bk" 'evil-next-buffer)
-(key-chord-define evil-normal-state-map "xk" 'kill-this-buffer)
-(key-chord-define-global "jx" 'smex)
+(key-chord-define evil-normal-state-map "b;" 'kill-this-buffer)
+(key-chord-define evil-normal-state-map "ff" 'find-file)
+(key-chord-define evil-normal-state-map "wh" 'evil-window-left)
+(key-chord-define evil-normal-state-map "wj" 'evil-window-down)
+(key-chord-define evil-normal-state-map "wk" 'evil-window-up)
+(key-chord-define evil-normal-state-map "wl" 'evil-window-right)
 
 (ido-mode t)
 
@@ -110,16 +118,33 @@
   "Turn on pseudo-structural editing of Lisp code."
   t)
 (add-hook 'prog-mode-hook 'enable-paredit-mode)
+(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 (add-hook 'prog-mode-hook (lambda () (interactive) (column-marker-1 80)))
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
 (add-hook 'prog-mode-hook 'turn-on-eldoc-mode)
 (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+;(add-hook 'cider-mode-hook (lambda () (add-to-list ‘write-file-functions ‘cider-load-current-buffer)))
+
 (add-hook 'clojure-mode-hook (lambda () (clj-refactor-mode 1)
-			       (cljr-add-keybindings-with-prefix "C-c C-j")))
+                               (cljr-add-keybindings-with-prefix "C-c C-j")))
 (eldoc-add-command 'paredit-backward-delete 'paredit-close-round)
-(global-rainbow-delimiters-mode)
 
 (add-to-list 'load-path "~/.emacs.d/snippets")
 (yas-global-mode 1)
+
+(defun noprompt/forward-transpose-sexps ()
+  (interactive)
+  (paredit-forward)
+  (transpose-sexps 1)
+  (paredit-backward))
+
+(defun noprompt/backward-transpose-sexps ()
+  (interactive)
+  (transpose-sexps 1)
+  (paredit-backward)
+  (paredit-backward))
+
+(key-chord-define-global "tk" 'noprompt/forward-transpose-sexps)
+(key-chord-define-global "tj" 'noprompt/backward-transpose-sexps)
 
 (provide 'packages)
