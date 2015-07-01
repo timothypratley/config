@@ -1,37 +1,70 @@
 (require 'package)
 
+(add-to-list 'auto-mode-alist '("\\.boot\\'" . clojure-mode))
+(add-to-list 'magic-mode-alist '(".* boot" . clojure-mode))
+
+;;(eval-after-load 'flycheck '(flycheck-clojure-setup))
+;;(add-hook 'after-init-hook #'global-flycheck-mode)
+;;(eval-after-load 'flycheck '(setq flycheck-display-errors-function #'flycheck-pos-tip-error-messages))
+
 (setq-default save-place t)
-(setq evil-shift-width 2
+(setq blink-cursor-blinks -1
+      cider-auto-select-error-buffer nil
+      cider-prompt-save-file-on-load nil
+      cider-repl-result-prefix ";; => "
+      cider-prefer-local-resources t
+      cider-repl-pop-to-buffer-on-connect nil
+      cider-show-error-buffer nil
+      cider-known-endpoints '(("te" "local-trek.outpace.com" "22345"))
+      cljr-magic-require-namespaces
+      '(("edn" . "clojure.edn")
+        ("io"   . "clojure.java.io")
+        ("log" . "clojure.tools.logging")
+        ("set"  . "clojure.set")
+        ("str"  . "clojure.string")
+        ("string" . "clojure.string")
+        ("time" . "clj-time.core")
+        ("walk" . "clojure.walk")
+        ("zip"  . "clojure.zip"))
+      evil-shift-width 2
       evil-want-C-u-scroll t
       evil-want-change-word-to-end t
       evil-default-cursor t
       evil-want-fine-undo t
-      save-place-file (concat user-emacs-directory "places")
+      gc-cons-threshold 20000000
       ido-enable-flex-matching t
       ido-everywhere t
       ido-use-virtual-buffers t
-      uniquify-buffer-name-style 'forward
+      magit-last-seen-setup-instructions "1.4.0"
       nrepl-hide-special-buffers t
-      cider-auto-select-error-buffer nil
-      cider-prompt-save-file-on-load nil
-      cider-repl-result-prefix ";; => ")
+      nrepl-log-messages t
+      save-place-file (concat user-emacs-directory "places")
+      uniquify-buffer-name-style 'forward)
 
+;;(add-to-list 'package-pinned-packages '(cider . "melpa-stable") t)
 (dolist (source '(("marmalade" . "http://marmalade-repo.org/packages/")
-                  ("melpa" . "http://melpa.milkbox.net/packages/")))
+                  ("melpa" . "http://melpa.org/packages/")))
   (add-to-list 'package-archives source t))
-
 (package-initialize)
 
 (dolist (package '(ace-jump-mode
                    dash
                    evil
+                   ;;flycheck
+                   ;;flycheck-clojure
+                   ;;flycheck-pos-tip
+                   flx-ido
+                   helm
+                   helm-ag
                    paredit
+                   projectile
                    column-marker
                    company
                    clj-refactor
                    cljsbuild-mode
                    clojure-mode
                    cider
+                   dirtree
                    exec-path-from-shell
                    ibuffer
                    idle-highlight-mode
@@ -67,7 +100,7 @@
 
 (evil-mode t)
 (define-key evil-normal-state-map (kbd "SPC") 'ace-jump-mode)
-(define-key evil-normal-state-map (kbd "M-.") 'cider-jump)
+(define-key evil-normal-state-map (kbd "M-.") 'cider-jump-to-var)
 (define-key evil-normal-state-map (kbd "M-,") 'cider-jump-back)
 
 ;; Escape quits
@@ -118,15 +151,26 @@
   "Turn on pseudo-structural editing of Lisp code."
   t)
 (add-hook 'prog-mode-hook 'enable-paredit-mode)
+(add-hook 'clojure-mode-hook 'enable-paredit-mode)
 (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 (add-hook 'prog-mode-hook (lambda () (interactive) (column-marker-1 80)))
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
 (add-hook 'prog-mode-hook 'turn-on-eldoc-mode)
-(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
-;(add-hook 'cider-mode-hook (lambda () (add-to-list ‘write-file-functions ‘cider-load-current-buffer)))
-
 (add-hook 'clojure-mode-hook (lambda () (clj-refactor-mode 1)
-                               (cljr-add-keybindings-with-prefix "C-c C-j")))
+                               (cljr-add-keybindings-with-prefix "C-c C-r")))
+(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+(defun cider-namespace-refresh ()
+  (interactive)
+  (cider-interactive-eval
+   "(require 'clojure.tools.namespace.repl)
+  (clojure.tools.namespace.repl/refresh)")
+  (cider-test-run-tests))
+(require 'clojure-mode)
+(define-key clojure-mode-map (kbd "C-c C-r") 'cider-namespace-refresh)
+;(add-hook 'cider-mode-hook
+          ;'(lambda () (add-hook 'after-save-hook
+                                ;'(lambda () (if (and (boundp 'cider-mode) cider-mode)
+                                              ;(cider-namespace-refresh))))))
 (eldoc-add-command 'paredit-backward-delete 'paredit-close-round)
 
 (add-to-list 'load-path "~/.emacs.d/snippets")
@@ -147,4 +191,27 @@
 (key-chord-define-global "tk" 'noprompt/forward-transpose-sexps)
 (key-chord-define-global "tj" 'noprompt/backward-transpose-sexps)
 
+(require 'dirtree)
 (provide 'packages)
+
+(require 'rainbow-delimiters)
+(set-face-attribute 'rainbow-delimiters-unmatched-face nil
+                    :foreground 'unspecified
+                    :inherit 'error)
+
+(defun save-all ()
+  (interactive)
+  (save-some-buffers t))
+(add-hook 'focus-out-hook 'save-all)
+
+;;(defun full-auto-save ()
+;;  (interactive)
+;;  (save-excursion
+;;    (dolist (buf (buffer-list))
+;;      (set-buffer buf)
+;;      (if (and (buffer-file-name) (buffer-modified-p))
+;;          (basic-save-buffer)))))
+;;(add-hook 'auto-save-hook 'full-auto-save)
+
+(global-hl-line-mode t)
+(projectile-global-mode)

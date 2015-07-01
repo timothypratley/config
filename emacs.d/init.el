@@ -1,19 +1,19 @@
 ;; Turn off the toolbar, scroll bar, and menu bar. Add line numbers.
 
-(if (display-graphic-p)
-  (progn
-    (tool-bar-mode -1)
-    (scroll-bar-mode -1)
-    (menu-bar-mode -1)
-    (global-linum-mode 1)))
+(progn
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (menu-bar-mode -1)
+  (global-linum-mode 1))
 
-(set-frame-font "Source Code Pro-15" nil t)
+(set-frame-font "Source Code Pro-16" nil t)
 
 (electric-indent-mode 1)
+(define-key global-map (kbd "RET") 'newline-and-indent)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;; Definition of a word includes symbol characters.
-(dolist (c (string-to-list ":_-?!#*^"))
+(dolist (c (string-to-list ":_-?!#*^/"))
   (modify-syntax-entry c "w" emacs-lisp-mode-syntax-table))
 
 ;; Allow emacsclient to launch faster.
@@ -24,6 +24,7 @@
 
 (setq-default indent-tabs-mode nil)
 (setq inhibit-startup-message t
+      linum-format "%d "
       use-dialog-box nil
       visible-bell nil
       scroll-step 1
@@ -50,9 +51,8 @@
 (when (fboundp 'winner-mode)
   (winner-mode 1))
 
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
 (require 'packages)
-(require 'cljdoc)
 
 (require 'cl)
 (defadvice save-buffers-kill-emacs (around no-query-kill-emacs activate)
@@ -79,22 +79,27 @@
     ;; Strip excess whitespace
     (while (string-match "\\`\s+\\|\n+\\'" form)
            (setq form (replace-match "" t t form)))
-    (set-buffer (cider-find-or-create-repl-buffer))
+    (set-buffer (cider-get-repl-buffer))
     (goto-char (point-max))
     (insert form)
     (cider-repl-return)))
 
-(define-key clojure-mode-map
+(require 'cider-mode)
+(define-key cider-mode-map
             (kbd "C-;") 'cider-eval-expression-at-point-in-repl)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("0c311fb22e6197daba9123f43da98f273d2bfaeeaeb653007ad1ee77f0003037" default))))
+ '(rainbow-delimiters-max-face-count 1)
+ '(safe-local-variable-values (quote ((ffip-project-file . "project.clj")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(idle-highlight ((t (:underline t))))
+ '(rainbow-delimiters-depth-1-face ((t (:foreground "gray50"))))
+ '(rainbow-delimiters-depth-2-face ((t (:foreground "gray50")))))
