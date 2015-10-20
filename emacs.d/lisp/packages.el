@@ -9,23 +9,24 @@
 
 (setq-default save-place t)
 (setq blink-cursor-blinks -1
-      cider-auto-select-error-buffer nil
-      cider-prompt-save-file-on-load nil
+      ;;cider-auto-select-error-buffer nil
+      ;;cider-prompt-save-file-on-load nil
       cider-repl-result-prefix ";; => "
       cider-prefer-local-resources t
-      cider-repl-pop-to-buffer-on-connect nil
-      cider-show-error-buffer nil
-      cider-known-endpoints '(("te" "local-trek.outpace.com" "22345"))
+      ;;cider-repl-pop-to-buffer-on-connect nil
+      ;;cider-show-error-buffer nil
+      cider-known-endpoints '(("te" "trick" "22345"))
       cljr-magic-require-namespaces
       '(("edn" . "clojure.edn")
-        ("io"   . "clojure.java.io")
+        ("io" . "clojure.java.io")
         ("log" . "clojure.tools.logging")
-        ("set"  . "clojure.set")
-        ("str"  . "clojure.string")
+        ("set" . "clojure.set")
+        ("str" . "clojure.string")
         ("string" . "clojure.string")
+        ("pprint" . "clojure.pprint")
         ("time" . "clj-time.core")
         ("walk" . "clojure.walk")
-        ("zip"  . "clojure.zip"))
+        ("zip" . "clojure.zip"))
       evil-shift-width 2
       evil-want-C-u-scroll t
       evil-want-change-word-to-end t
@@ -60,10 +61,11 @@
                    projectile
                    column-marker
                    company
+                   cider
+                   ;;cider-eval-sexp-fu
                    clj-refactor
                    cljsbuild-mode
                    clojure-mode
-                   cider
                    dirtree
                    exec-path-from-shell
                    ibuffer
@@ -71,6 +73,8 @@
                    ido
                    ido-better-flex
                    ido-ubiquitous
+                   json-mode
+                   coffee-mode
                    key-chord
                    magit
                    rainbow-delimiters
@@ -127,16 +131,48 @@
 (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
 (key-chord-define evil-replace-state-map "jk" 'evil-normal-state)
 (key-chord-define-global "jx" 'smex)
+(key-chord-define-global "js" 'save-buffer)
 
-(key-chord-define evil-normal-state-map "bl" 'ido-switch-buffer)
-(key-chord-define evil-normal-state-map "bj" 'evil-prev-buffer)
-(key-chord-define evil-normal-state-map "bk" 'evil-next-buffer)
-(key-chord-define evil-normal-state-map "b;" 'kill-this-buffer)
-(key-chord-define evil-normal-state-map "ff" 'find-file)
-(key-chord-define evil-normal-state-map "wh" 'evil-window-left)
-(key-chord-define evil-normal-state-map "wj" 'evil-window-down)
-(key-chord-define evil-normal-state-map "wk" 'evil-window-up)
-(key-chord-define evil-normal-state-map "wl" 'evil-window-right)
+(define-key evil-normal-state-map "\C-e" 'evil-end-of-line)
+(define-key evil-insert-state-map "\C-e" 'end-of-line)
+(define-key evil-visual-state-map "\C-e" 'evil-end-of-line)
+(define-key evil-motion-state-map "\C-e" 'evil-end-of-line)
+(define-key evil-normal-state-map "\C-f" 'evil-forward-char)
+(define-key evil-insert-state-map "\C-f" 'evil-forward-char)
+(define-key evil-insert-state-map "\C-f" 'evil-forward-char)
+(define-key evil-normal-state-map "\C-b" 'evil-backward-char)
+(define-key evil-insert-state-map "\C-b" 'evil-backward-char)
+(define-key evil-visual-state-map "\C-b" 'evil-backward-char)
+;(define-key evil-normal-state-map "\C-d" 'evil-delete-char)
+;(define-key evil-insert-state-map "\C-d" 'evil-delete-char)
+;(define-key evil-visual-state-map "\C-d" 'evil-delete-char)
+(define-key evil-normal-state-map "\C-n" 'evil-next-line)
+(define-key evil-insert-state-map "\C-n" 'evil-next-line)
+(define-key evil-visual-state-map "\C-n" 'evil-next-line)
+(define-key evil-normal-state-map "\C-p" 'evil-previous-line)
+(define-key evil-insert-state-map "\C-p" 'evil-previous-line)
+(define-key evil-visual-state-map "\C-p" 'evil-previous-line)
+(define-key evil-normal-state-map "\C-w" 'evil-delete)
+(define-key evil-insert-state-map "\C-w" 'evil-delete)
+(define-key evil-visual-state-map "\C-w" 'evil-delete)
+(define-key evil-normal-state-map "\C-y" 'yank)
+(define-key evil-insert-state-map "\C-y" 'yank)
+(define-key evil-visual-state-map "\C-y" 'yank)
+(define-key evil-normal-state-map "\C-k" 'kill-line)
+(define-key evil-insert-state-map "\C-k" 'kill-line)
+(define-key evil-visual-state-map "\C-k" 'kill-line)
+(define-key evil-normal-state-map "Q" 'call-last-kbd-macro)
+(define-key evil-visual-state-map "Q" 'call-last-kbd-macro)
+(define-key evil-normal-state-map (kbd "TAB") 'evil-undefine)
+
+;;(key-chord-define-global "bb" 'ido-switch-buffer)
+(key-chord-define-global "bp" 'evil-prev-buffer)
+(key-chord-define-global "bn" 'evil-next-buffer)
+(key-chord-define-global "bk" 'quit-window)
+(key-chord-define-global "zh" 'evil-window-left)
+(key-chord-define-global "zj" 'evil-window-down)
+(key-chord-define-global "zk" 'evil-window-up)
+(key-chord-define-global "zl" 'evil-window-right)
 
 (ido-mode t)
 
@@ -172,6 +208,11 @@
                                 ;'(lambda () (if (and (boundp 'cider-mode) cider-mode)
                                               ;(cider-namespace-refresh))))))
 (eldoc-add-command 'paredit-backward-delete 'paredit-close-round)
+;(require 'cider-eval-sexp-fu)
+(add-hook 'json-mode-hook
+          (lambda ()
+            (make-local-variable 'js-indent-level)
+                        (setq js-indent-level 2)))
 
 (add-to-list 'load-path "~/.emacs.d/snippets")
 (yas-global-mode 1)
@@ -203,15 +244,5 @@
   (interactive)
   (save-some-buffers t))
 (add-hook 'focus-out-hook 'save-all)
-
-;;(defun full-auto-save ()
-;;  (interactive)
-;;  (save-excursion
-;;    (dolist (buf (buffer-list))
-;;      (set-buffer buf)
-;;      (if (and (buffer-file-name) (buffer-modified-p))
-;;          (basic-save-buffer)))))
-;;(add-hook 'auto-save-hook 'full-auto-save)
-
-(global-hl-line-mode t)
-(projectile-global-mode)
+;;(defun my-save () (if (buffer-file-name) (evil-save)))
+;;(add-hook 'evil-insert-state-exit-hook 'my-save)

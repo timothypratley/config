@@ -6,7 +6,7 @@
   (menu-bar-mode -1)
   (global-linum-mode 1))
 
-(set-frame-font "Source Code Pro-16" nil t)
+(set-frame-font "Source Code Pro-14" nil t)
 
 (electric-indent-mode 1)
 (define-key global-map (kbd "RET") 'newline-and-indent)
@@ -17,7 +17,7 @@
   (modify-syntax-entry c "w" emacs-lisp-mode-syntax-table))
 
 ;; Allow emacsclient to launch faster.
-(server-start)
+;;(server-start)
 
 (fset 'compile-and-goto-repl "\C-x\C-s\C-c\C-k\C-c\C-z")
 (global-set-key [f5] 'compile-and-goto-repl)
