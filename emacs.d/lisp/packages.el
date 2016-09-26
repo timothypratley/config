@@ -40,15 +40,20 @@
       nrepl-hide-special-buffers t
       nrepl-log-messages t
       save-place-file (concat user-emacs-directory "places")
-      uniquify-buffer-name-style 'forward)
+      uniquify-buffer-name-style 'forward
+      package-pinned-packages '((cider . "melpa-stable")))
 
-;;(add-to-list 'package-pinned-packages '(cider . "melpa-stable") t)
-(dolist (source '(("marmalade" . "http://marmalade-repo.org/packages/")
-                  ("melpa" . "http://melpa.org/packages/")))
-  (add-to-list 'package-archives source t))
+(when (>= emacs-major-version 24)
+    (setq package-archives '(("ELPA" .  "http://tromey.com/elpa/")
+                             ("gnu" .  "http://elpa.gnu.org/packages/")
+                             ("melpa" .  "http://melpa.org/packages/")
+                             ("melpa-stable" .  "http://stable.melpa.org/packages/")
+                             ("marmalade" .  "http://marmalade-repo.org/packages/"))))
+
 (package-initialize)
 
 (dolist (package '(ace-jump-mode
+                   ag
                    dash
                    evil
                    ;;flycheck
@@ -63,10 +68,11 @@
                    company
                    cider
                    ;;cider-eval-sexp-fu
-                   clj-refactor
+                   ;;clj-refactor
                    cljsbuild-mode
                    clojure-mode
                    dirtree
+                   elm-mode
                    exec-path-from-shell
                    ibuffer
                    idle-highlight-mode
@@ -75,13 +81,14 @@
                    ido-ubiquitous
                    json-mode
                    coffee-mode
-                   key-chord
+                   ;;key-chord
                    magit
                    rainbow-delimiters
                    saveplace
                    smex
                    yasnippet
                    yaml-mode
+                   restclient
                    ;; themes
                    ;ample-theme
                    ;base16-theme
@@ -100,7 +107,7 @@
 
 (exec-path-from-shell-initialize)
 
-(key-chord-mode 1)
+;;(key-chord-mode 0)
 
 (evil-mode t)
 (define-key evil-normal-state-map (kbd "SPC") 'ace-jump-mode)
@@ -152,15 +159,15 @@
 (define-key evil-normal-state-map "\C-p" 'evil-previous-line)
 (define-key evil-insert-state-map "\C-p" 'evil-previous-line)
 (define-key evil-visual-state-map "\C-p" 'evil-previous-line)
-(define-key evil-normal-state-map "\C-w" 'evil-delete)
-(define-key evil-insert-state-map "\C-w" 'evil-delete)
-(define-key evil-visual-state-map "\C-w" 'evil-delete)
+;(define-key evil-normal-state-map "\C-w" 'evil-delete)
+;(define-key evil-insert-state-map "\C-w" 'evil-delete)
+;(define-key evil-visual-state-map "\C-w" 'evil-delete)
 (define-key evil-normal-state-map "\C-y" 'yank)
 (define-key evil-insert-state-map "\C-y" 'yank)
 (define-key evil-visual-state-map "\C-y" 'yank)
-(define-key evil-normal-state-map "\C-k" 'kill-line)
-(define-key evil-insert-state-map "\C-k" 'kill-line)
-(define-key evil-visual-state-map "\C-k" 'kill-line)
+(define-key evil-normal-state-map "\C-k" 'paredit-kill)
+(define-key evil-insert-state-map "\C-k" 'paredit-kill)
+(define-key evil-visual-state-map "\C-k" 'paredit-kill)
 (define-key evil-normal-state-map "Q" 'call-last-kbd-macro)
 (define-key evil-visual-state-map "Q" 'call-last-kbd-macro)
 (define-key evil-normal-state-map (kbd "TAB") 'evil-undefine)
@@ -192,8 +199,8 @@
 (add-hook 'prog-mode-hook (lambda () (interactive) (column-marker-1 80)))
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
 (add-hook 'prog-mode-hook 'turn-on-eldoc-mode)
-(add-hook 'clojure-mode-hook (lambda () (clj-refactor-mode 1)
-                               (cljr-add-keybindings-with-prefix "C-c C-r")))
+;(add-hook 'clojure-mode-hook (lambda () (clj-refactor-mode 1)
+                               ;(cljr-add-keybindings-with-prefix "C-c C-r")))
 (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
 (defun cider-namespace-refresh ()
   (interactive)

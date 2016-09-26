@@ -1,5 +1,12 @@
 ;; Turn off the toolbar, scroll bar, and menu bar. Add line numbers.
 
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (progn
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
@@ -72,21 +79,6 @@
   (let ((buf (get-buffer-create "*cljs-scratch*")))
     (switch-to-buffer buf)
     (clojurescript-mode)))
-
-(defun cider-eval-expression-at-point-in-repl ()
-  (interactive)
-  (let ((form (cider-defun-at-point)))
-    ;; Strip excess whitespace
-    (while (string-match "\\`\s+\\|\n+\\'" form)
-           (setq form (replace-match "" t t form)))
-    (set-buffer (cider-get-repl-buffer))
-    (goto-char (point-max))
-    (insert form)
-    (cider-repl-return)))
-
-(require 'cider-mode)
-(define-key cider-mode-map
-            (kbd "C-;") 'cider-eval-expression-at-point-in-repl)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
